@@ -1,0 +1,41 @@
+---
+const navLinks = [
+  { href: '/projects', label: 'projects' },
+  { href: '/writing', label: 'writing' },
+  { href: '/about', label: 'about' },
+];
+
+const pathname = Astro.url.pathname;
+---
+
+<header>
+  <div class="container">
+    <nav>
+      <a href="/" class="nav-brand">fulvio.sh</a>
+
+      <ul class="nav-links">
+        {navLinks.map(({ href, label }) => (
+          <li>
+            <a
+              href={href}
+              class="nav-link"
+              aria-current={pathname.startsWith(href) ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+
+        <li>
+          <button
+            class="theme-toggle"
+            data-theme-toggle
+            aria-label="Toggle theme"
+          >
+            light
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
