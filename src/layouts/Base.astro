@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'Software Engineer. Data Engineering, LLM/AI Agents, and Security.',
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = title === 'Fulvio Favilla' ? title : `${title} — Fulvio Favilla`;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Primary meta -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
+    <!-- Theme: set before paint to avoid flash -->
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', stored ?? preferred);
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+
+    <!-- Theme toggle logic -->
+    <script>
+      function initTheme() {
+        const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+        toggles.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+
+            // Update button labels
+            toggles.forEach((b) => {
+              b.textContent = next === 'dark' ? 'light' : 'dark';
+              b.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} mode`);
+            });
+          });
+
+          // Set initial label
+          const current = document.documentElement.getAttribute('data-theme');
+          btn.textContent = current === 'dark' ? 'light' : 'dark';
+          btn.setAttribute('aria-label', `Switch to ${current === 'dark' ? 'light' : 'dark'} mode`);
+        });
+      }
+
+      initTheme();
+      document.addEventListener('astro:after-swap', initTheme);
+    </script>
+  </body>
+</html>
