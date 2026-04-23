@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const projects = [
+  {
+    name: 'ResumeRadar',
+    description: 'RAG-powered resume analysis and matching engine. Built with LangGraph, FastAPI, and Docker.',
+    tags: ['python', 'langgraph', 'rag', 'fastapi', 'docker'],
+    href: 'https://github.com/fulviofavilla/resume-radar',
+    status: 'in progress',
+  },
+  {
+    name: 'Security Analyzer',
+    description: 'Automated security analysis for GitHub repositories using LangGraph and static analysis tools.',
+    tags: ['python', 'langgraph', 'github api', 'security'],
+    href: 'https://github.com/fulviofavilla/security-analyzer',
+    status: 'in progress',
+  },
+];
+---
+
+<Base title="Projects — Fulvio Favilla" description="Things I'm building.">
+  <Header />
+
+  <main>
+    <section class="container">
+      <div class="page-header">
+        <div class="meta">projects</div>
+        <h1>Projects</h1>
+      </div>
+
+      <div class="card-grid">
+        {projects.map(({ name, description, tags, href, status }) => (
+          <a href={href} class="card card-link" target="_blank" rel="noopener noreferrer">
+            <div class="card-header">
+              <span class="card-name">{name}</span>
+              <span class="tag">{status}</span>
+            </div>
+            <p class="card-description">{description}</p>
+            <div class="tags" style="margin-top: var(--space-4);">
+              {tags.map((t) => <span class="tag">{t}</span>)}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .page-header {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
+  }
+
+  .page-header .meta {
+    margin-bottom: var(--space-4);
+  }
+
+  .page-header h1 {
+    margin: 0;
+  }
+
+  .card-grid {
+    padding-bottom: var(--space-16);
+  }
+
+  .card-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .card-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .card-description {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+</style>

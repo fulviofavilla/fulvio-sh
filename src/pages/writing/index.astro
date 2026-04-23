@@ -1,0 +1,127 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const writeups = await getCollection('writeups', ({ data }) => !data.draft);
+
+const all = [
+  ...posts.map((p) => ({ ...p, type: 'blog' as const, href: `/blog/${p.id}` })),
+  ...writeups.map((w) => ({ ...w, type: 'writeup' as const, href: `/writeups/${w.id}` })),
+].sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Base title="Writing — Fulvio Favilla" description="Blog posts and security writeups.">
+  <Header />
+
+  <main>
+    <section class="container">
+      <div class="page-header">
+        <div class="meta">writing</div>
+        <h1>Writing</h1>
+      </div>
+
+      {all.length === 0 ? (
+        <p class="meta empty">Nothing published yet.</p>
+      ) : (
+        <ul class="post-list">
+          {all.map((entry) => {
+            const isoDate = entry.data.date.toISOString().split('T')[0];
+            return (
+              <li class="post-item">
+                <a href={entry.href} class="post-link">
+                  <time datetime={isoDate} class="post-date meta">{isoDate}</time>
+                  <span class="post-title">{entry.data.title}</span>
+                  <span class={`post-type meta type--${entry.type}`}>{entry.type === 'writeup' ? 'writeup' : 'blog'}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .page-header {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-12);
+  }
+
+  .page-header .meta {
+    margin-bottom: var(--space-4);
+  }
+
+  .page-header h1 {
+    margin: 0;
+  }
+
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-bottom: var(--space-16);
+  }
+
+  .post-item {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .post-item:last-child {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .post-link {
+    display: grid;
+    grid-template-columns: 7rem 1fr auto;
+    align-items: baseline;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.15s ease;
+  }
+
+  .post-link:hover {
+    opacity: 0.6;
+  }
+
+  .post-date {
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+
+  .post-title {
+    font-size: var(--text-base);
+    color: var(--text);
+  }
+
+  .post-type {
+    color: var(--text-faint);
+  }
+
+  .type--writeup {
+    color: var(--text-muted);
+  }
+
+  .empty {
+    color: var(--text-faint);
+    padding-bottom: var(--space-16);
+  }
+
+  @media (max-width: 600px) {
+    .post-link {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .post-type {
+      display: none;
+    }
+  }
+</style>
