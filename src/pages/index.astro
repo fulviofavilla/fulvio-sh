@@ -4,8 +4,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
 const stack = [
-  'Python', 'SQL', 'AWS', 'FastAPI', 'Docker',
-  'LangChain', 'LangGraph', 'RAG', 'PySpark', 'Airflow',
+  'Python', 'SQL', 'AWS', 'Docker', 'FastAPI',
+  'LangChain', 'LangGraph', 'PySpark', 'Airflow', 'GitHub Actions',
 ];
 
 const featured = [
@@ -14,13 +14,6 @@ const featured = [
     description: 'RAG-powered resume analysis and matching engine. Built with LangGraph, FastAPI, and Docker.',
     tags: ['python', 'langgraph', 'rag', 'fastapi'],
     href: 'https://github.com/fulviofavilla/resume-radar',
-    status: 'in progress',
-  },
-  {
-    name: 'Security Analyzer',
-    description: 'Automated security analysis for GitHub repositories using LangGraph and static analysis tools.',
-    tags: ['python', 'langgraph', 'github api', 'security'],
-    href: 'https://github.com/fulviofavilla/security-analyzer',
     status: 'in progress',
   },
 ];
@@ -35,29 +28,11 @@ const featured = [
       <div class="hero-label meta">software engineer</div>
       <h1>Fulvio Favilla</h1>
       <p class="lead">
-        I design and build systems that make data useful.
+        I build systems that make data useful.
       </p>
       <div class="hero-links">
         <a href="/projects" class="nav-link">projects →</a>
         <a href="/writing" class="nav-link">writing →</a>
-        <a
-          href="https://github.com/fulviofavilla"
-          class="nav-link"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          github →
-        </a>
-      </div>
-    </section>
-
-    <!-- Stack -->
-    <section class="section container">
-      <h2 class="section-label meta">stack</h2>
-      <div class="tags">
-        {stack.map((item) => (
-          <span class="tag">{item}</span>
-        ))}
       </div>
     </section>
 
@@ -90,8 +65,8 @@ const featured = [
 <style>
   /* Hero */
   .hero {
-    padding-top: var(--space-16);
-    padding-bottom: var(--space-16);
+    padding-top: var(--space-24);
+    padding-bottom: var(--space-24);
   }
 
   .hero-label {
@@ -100,10 +75,10 @@ const featured = [
 
   .hero h1 {
     margin-bottom: var(--space-6);
+    line-height: 1.05;
   }
 
   .hero .lead {
-    max-width: 520px;
     margin-bottom: var(--space-8);
   }
 
@@ -111,6 +86,13 @@ const featured = [
     display: flex;
     gap: var(--space-6);
     flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-16);
+    }
   }
 
   /* Sections */
