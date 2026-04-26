@@ -484,8 +484,8 @@ footer p {
 .tag {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--text-faint);
-  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
   border-radius: 3px;
   padding: var(--space-1) var(--space-2);
   letter-spacing: 0.04em;
@@ -495,7 +495,7 @@ footer p {
 }
 
 .tag:hover {
-  color: var(--text-muted);
+  color: var(--text);
   border-color: var(--border);
 }
 

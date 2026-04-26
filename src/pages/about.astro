@@ -4,10 +4,10 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
 const stack = {
-  languages: ['Python', 'SQL', 'TypeScript'],
-  backend: ['FastAPI', 'Docker', 'AWS', 'GitHub Actions'],
+  languages: ['Python', 'JavaScript', 'SQL'],
+  infrastructure: ['AWS', 'Azure', 'Docker', 'GitHub Actions'],
   data: ['PySpark', 'Airflow', 'Pandas'],
-  ai: ['LangChain', 'LangGraph', 'RAG', 'Scikit-Learn'],
+  backend: ['FastAPI', 'LangChain', 'LangGraph'],
 };
 ---
 
@@ -24,18 +24,20 @@ const stack = {
       <div class="about-grid">
         <div class="about-bio">
           <p class="intro">
-            Software Engineer based in São Paulo, Brazil. Background in Electrical Engineering
-            and Data Engineering.
+            Software Engineer based in São Paulo.
+          </p>
+          <p class="intro-sub">
+            I build backend systems and data pipelines that are reliable, observable, and built to last.
           </p>
           <p>
-            I build things that are useful first, interesting second. Most of my work lives at the
-            intersection of data, AI, and security.
+            Data engineering and backend infrastructure done right don't just process data.
+            They make it useful for the people and products that depend on it.
           </p>
-
-          <div class="contact-links">
-            <a href="https://github.com/fulviofavilla" class="nav-link" target="_blank" rel="noopener noreferrer">github →</a>
-            <a href="mailto:fulvio@fulvio.sh" class="nav-link">email →</a>
-          </div>
+          <p>
+            Outside of that, I have an active interest in cybersecurity. I study through
+            labs and CTFs, and I'm building toward security engineering as a natural
+            extension of the systems work I already do.
+          </p>
         </div>
 
         <div class="about-stack">
@@ -71,7 +73,7 @@ const stack = {
 
   .about-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 5fr 4fr;
     gap: var(--space-16);
     padding-bottom: var(--space-16);
     align-items: start;
@@ -80,20 +82,20 @@ const stack = {
   .about-bio p {
     color: var(--text-muted);
     line-height: 1.7;
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-6);
   }
 
   .about-bio p.intro {
-    margin-bottom: var(--space-8);
+    color: var(--text);
+    font-size: var(--text-lg);
+    font-weight: 300;
+    margin-bottom: var(--space-6);
   }
 
-  .about-bio p:last-of-type {
-    margin-bottom: var(--space-8);
-  }
-
-  .contact-links {
-    display: flex;
-    gap: var(--space-6);
+  .about-bio p.intro-sub {
+    color: var(--text-muted);
+    font-size: var(--text-base);
+    margin-bottom: var(--space-6);
   }
 
   .stack-group {
