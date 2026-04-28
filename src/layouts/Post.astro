@@ -10,9 +10,10 @@ interface Props {
   tags?: string[];
   platform?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+  readingTime?: number;
 }
 
-const { title, description, date, tags = [], platform, difficulty } = Astro.props;
+const { title, description, date, tags = [], platform, difficulty, readingTime } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -42,6 +43,11 @@ const isoDate = date.toISOString().split('T')[0];
           {difficulty && (
             <span class="meta" style="color: var(--text-faint);">·</span>
             <span class={`meta difficulty--${difficulty}`}>{difficulty}</span>
+          )}
+
+          {readingTime && (
+            <span class="meta" style="color: var(--text-faint);">·</span>
+            <span class="meta">{readingTime} min read</span>
           )}
         </div>
 
