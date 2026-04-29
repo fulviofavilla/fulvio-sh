@@ -11,9 +11,10 @@ interface Props {
   platform?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
   readingTime?: number;
+  slug: string;
 }
 
-const { title, description, date, tags = [], platform, difficulty, readingTime } = Astro.props;
+const { title, description, date, tags = [], platform, difficulty, readingTime, slug } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -25,7 +26,7 @@ const formattedDate = date.toLocaleDateString('en-US', {
 const isoDate = date.toISOString().split('T')[0];
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} ogImage={slug ? `/og/${slug}.png` : undefined}>
   <Header />
 
   <main>
