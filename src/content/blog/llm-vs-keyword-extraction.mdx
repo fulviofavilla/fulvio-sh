@@ -1,0 +1,136 @@
+---
+title: "When LLMs beat regex, and when they don't: skill extraction in ResumeRadar"
+description: "Building ResumeRadar taught me exactly where LLMs outperform keyword matching for skill extraction, and where they don't. Here's the code, the tradeoffs, and the decision to keep both."
+date: 2026-04-28
+tags: [python, llm, rag, fastapi, engineering]
+draft: false
+---
+
+Extracting skills from a resume sounds like a solved problem. Split on commas, match against a list, done.
+
+It isn't. Building [ResumeRadar](https://github.com/fulviofavilla/resume-radar) forced me to figure out exactly where that assumption breaks, and where it actually holds up.
+
+## The problem with "Python" being easy
+
+If a resume lists `Python` under a Skills section, keyword matching works fine. Fast, costs nothing, no external dependencies.
+
+The problem is that most meaningful signal isn't in the Skills section. It's buried in experience bullets like:
+
+> "Reduced deployment time from 45 minutes to 8 minutes"
+
+A keyword matcher sees nothing useful there. No tool names, no explicit skill labels. A well-prompted LLM reads the same bullet and extracts `CI/CD`, `DevOps`, and `build optimization`. None of those words appear in the original text, but they're clearly demonstrated by what the candidate did.
+
+That gap is the whole problem.
+
+## What keyword matching does well
+
+ResumeRadar still uses keyword matching. The core idea is simple: count how often each skill appears across job postings, then flag the ones missing from the resume.
+
+```python
+def _keyword_gap_analysis(
+    resume_skills: list[str],
+    job_postings_skills: list[list[str]],
+    job_descriptions: list[str],
+) -> GapAnalysis:
+    resume_set = {s.lower() for s in resume_skills}
+    all_job_skills = [s.lower() for skills in job_postings_skills for s in skills]
+    job_skill_counts = Counter(all_job_skills)
+
+    missing_skills = [
+        skill for skill, count in job_skill_counts.most_common(20)
+        if skill not in resume_set and skill not in SKILL_NOISE and count >= 2
+    ]
+    ...
+```
+
+`SKILL_NOISE` is a manually curated blocklist: "engineer", "senior", "team", "experience", "building". Without it, the results fill up with words that look like skills but carry no signal. You need to maintain this list by hand, which is annoying but unavoidable.
+
+The upside: you can inspect every match, trace every decision, and the output is consistent across runs. The downside: it only finds what it's explicitly looking for.
+
+## Where it breaks down
+
+Two places.
+
+**Implicit skills.** A candidate who "reduced deployment time from 45 to 8 minutes" has clearly worked with CI/CD pipelines. But unless they wrote "CI/CD" somewhere, keyword matching won't find it. Most candidates don't narrate their skills. They describe what they did, and leave the label implicit.
+
+**Synonyms.** "Docker", "containerization", and "container orchestration" all refer to overlapping concepts. Keyword matching treats them as completely different strings, so a resume with "Docker" won't match a job posting that says "containerization experience required".
+
+## LLM extraction with a surgical prompt
+
+ResumeRadar uses two separate extraction prompts, one for resumes and one for job descriptions.
+
+The resume prompt:
+
+```python
+EXTRACTION_PROMPT = """
+Extract structured information from the resume text below — consider the ENTIRE document,
+not just the Skills section. Infer skills demonstrated in job descriptions and projects.
+
+Return ONLY valid JSON matching this schema:
+{
+  "skills": ["skill1", "skill2", ...],
+  "inferred_skills": ["skill1", "skill2", ...],
+  ...
+}
+
+Rules:
+- skills: explicitly listed technical skills
+- inferred_skills: skills DEMONSTRATED in experience but NOT explicitly listed
+  Examples: "reduced deployment time from 45 to 8 minutes" → ["CI/CD", "DevOps", "build optimization"]
+            "set up automated alerts for service health and error rates" → ["observability", "monitoring", "on-call operations"]
+"""
+```
+
+The job description prompt:
+
+```python
+JOB_SKILL_PROMPT = """
+Extract only the required and preferred technical skills from this job description.
+Include: programming languages, frameworks, tools, platforms, databases, cloud services.
+Exclude: soft skills, generic words (e.g. "communication", "teamwork", "experience").
+
+Return ONLY a JSON array of strings. No markdown, no explanation.
+"""
+```
+
+A few decisions worth explaining.
+
+The `skills` vs `inferred_skills` split is intentional. Keeping them separate lets the matching layer weight them differently, since an explicitly listed skill is stronger evidence than an inferred one. It also lets me show the candidate exactly what was inferred vs what they actually wrote, which matters for trust.
+
+`temperature=0` throughout. Skill extraction needs to be deterministic. Any randomness in what gets extracted from the same input is just noise.
+
+Job descriptions get truncated to 3,000 characters, resumes to 8,000. The main reason isn't token cost. Longer inputs tend to get diluted by boilerplate, and the most relevant content is almost always near the top.
+
+## The fallback
+
+ResumeRadar uses ChromaDB as a vector database for semantic matching. A vector database stores data as numeric representations of meaning, which allows comparing resumes and job postings by concept rather than exact words. When ChromaDB is unavailable, the whole semantic path goes down with it.
+
+So keyword matching isn't just legacy code. It's an explicit fallback:
+
+```python
+try:
+    state.gap_analysis = await _semantic_gap_analysis(
+        job_id=state.job_id,
+        resume_skills=all_resume_skills,
+        job_postings_skills=job_skills_lists,
+    )
+except Exception as e:
+    logger.warning(f"ChromaDB unavailable ({e}), falling back to keyword matching")
+    state.gap_analysis = _keyword_gap_analysis(
+        resume_skills=all_resume_skills,
+        job_postings_skills=job_skills_lists,
+        job_descriptions=job_descriptions,
+    )
+```
+
+Both paths return a `GapAnalysis` object, so the rest of the pipeline doesn't know which one ran. Keyword matching gives worse results than semantic matching, but it's better than returning an error. For explicit skills, the difference is smaller than you'd expect.
+
+## When to use each
+
+After building this, my rough mental model:
+
+**Keyword matching** when you need speed, transparency, or zero external dependencies. Also when skills are explicitly listed and you control the vocabulary: internal tooling, structured job boards, anything where the input is consistent.
+
+**LLM extraction** when the signal is implicit, the vocabulary is inconsistent, or you need to handle synonyms. Resume parsing is a good fit. So is any domain where "what someone did" and "what they call it" regularly diverge.
+
+The mistake is treating these as competing approaches. They're complementary. Keyword matching as a fallback isn't a compromise, it's just what keeps the system useful when the smarter path isn't available.

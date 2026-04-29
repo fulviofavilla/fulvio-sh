@@ -413,6 +413,30 @@ footer p {
   border: 1px solid var(--border-subtle);
 }
 
+.prose pre {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.prose :not(pre) > code {
+  color: var(--text-muted);
+}
+
+/* Shiki dual-theme: map CSS variables to light/dark tokens */
+.prose pre span,
+pre span {
+  color: var(--shiki-light);
+}
+
+[data-theme="dark"] .prose pre span,
+[data-theme="dark"] pre span {
+  color: var(--shiki-dark);
+}
+
+pre.astro-code {
+  background-color: var(--bg-surface) !important;
+}
+
 /* ------------------------------------------------------------
    CARDS — projects, writing list
    ------------------------------------------------------------ */
