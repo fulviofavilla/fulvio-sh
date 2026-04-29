@@ -23,6 +23,7 @@ const readingTime = Math.max(1, Math.round(words / 200));
   date={post.data.date}
   tags={post.data.tags}
   readingTime={readingTime}
+  slug={`blog/${post.id}`}
 >
   <Content />
 </Post>
