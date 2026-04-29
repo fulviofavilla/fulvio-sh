@@ -1,5 +1,5 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
 
 interface Props {
   title: string;
@@ -9,13 +9,14 @@ interface Props {
 
 const {
   title,
-  description = 'Software Engineer. Data Engineering, LLM/AI Agents, and Security.',
-  ogImage = '/og-default.svg',
+  description = "Software Engineer. Data Engineering, LLM/AI Agents, and Security.",
+  ogImage = "/og-default.svg",
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
-const fullTitle = title === 'Fulvio Favilla' ? title : `${title} — Fulvio Favilla`;
+const fullTitle =
+  title === "Fulvio Favilla" ? title : `${title} — Fulvio Favilla`;
 ---
 
 <!doctype html>
@@ -25,8 +26,20 @@ const fullTitle = title === 'Fulvio Favilla' ? title : `${title} — Fulvio Favi
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
+    <!-- Analytics -->
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id="5457021c-d117-49e3-acb9-8781902f7bb8"
+      data-domains="fulvio.sh"></script>
+
     <!-- RSS Feed -->
-    <link rel="alternate" type="application/rss+xml" title="Fulvio Favilla" href="/rss.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Fulvio Favilla"
+      href="/rss.xml"
+    />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -57,9 +70,15 @@ const fullTitle = title === 'Fulvio Favilla' ? title : `${title} — Fulvio Favi
     <!-- Theme: set before paint to avoid flash -->
     <script is:inline>
       (function () {
-        const stored = localStorage.getItem('theme');
-        const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', stored ?? preferred);
+        const stored = localStorage.getItem("theme");
+        const preferred = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
+          ? "dark"
+          : "light";
+        document.documentElement.setAttribute(
+          "data-theme",
+          stored ?? preferred,
+        );
       })();
     </script>
   </head>
@@ -69,31 +88,39 @@ const fullTitle = title === 'Fulvio Favilla' ? title : `${title} — Fulvio Favi
     <!-- Theme toggle logic -->
     <script>
       function initTheme() {
-        const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+        const toggles = document.querySelectorAll<HTMLButtonElement>(
+          "[data-theme-toggle]",
+        );
 
         toggles.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
+          btn.addEventListener("click", () => {
+            const current = document.documentElement.getAttribute("data-theme");
+            const next = current === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", next);
+            localStorage.setItem("theme", next);
 
             // Update button labels
             toggles.forEach((b) => {
-              b.textContent = next === 'dark' ? 'light' : 'dark';
-              b.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} mode`);
+              b.textContent = next === "dark" ? "light" : "dark";
+              b.setAttribute(
+                "aria-label",
+                `Switch to ${next === "dark" ? "light" : "dark"} mode`,
+              );
             });
           });
 
           // Set initial label
-          const current = document.documentElement.getAttribute('data-theme');
-          btn.textContent = current === 'dark' ? 'light' : 'dark';
-          btn.setAttribute('aria-label', `Switch to ${current === 'dark' ? 'light' : 'dark'} mode`);
+          const current = document.documentElement.getAttribute("data-theme");
+          btn.textContent = current === "dark" ? "light" : "dark";
+          btn.setAttribute(
+            "aria-label",
+            `Switch to ${current === "dark" ? "light" : "dark"} mode`,
+          );
         });
       }
 
       initTheme();
-      document.addEventListener('astro:after-swap', initTheme);
+      document.addEventListener("astro:after-swap", initTheme);
     </script>
   </body>
 </html>
