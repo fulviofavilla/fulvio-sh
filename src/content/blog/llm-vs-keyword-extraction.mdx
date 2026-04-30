@@ -1,8 +1,8 @@
 ---
-title: "When LLMs beat regex, and when they don't: skill extraction in ResumeRadar"
-description: "Building ResumeRadar taught me exactly where LLMs outperform keyword matching for skill extraction, and where they don't. Here's the code, the tradeoffs, and the decision to keep both."
+title: "Not all skills are written down: building skill extraction for ResumeRadar"
+description: "Building ResumeRadar forced me to figure out exactly where LLMs outperform keyword matching for skill extraction, and where they don't."
 date: 2026-04-28
-tags: [python, llm, rag, fastapi, engineering]
+tags: [python, llm, nlp, embeddings, engineering]
 draft: false
 ---
 
@@ -10,7 +10,7 @@ Extracting skills from a resume sounds like a solved problem. Split on commas, m
 
 It isn't. Building [ResumeRadar](https://github.com/fulviofavilla/resume-radar) forced me to figure out exactly where that assumption breaks, and where it actually holds up.
 
-## The problem with "Python" being easy
+## What keyword matching misses
 
 If a resume lists `Python` under a Skills section, keyword matching works fine. Fast, costs nothing, no external dependencies.
 
@@ -47,7 +47,7 @@ def _keyword_gap_analysis(
 
 The upside: you can inspect every match, trace every decision, and the output is consistent across runs. The downside: it only finds what it's explicitly looking for.
 
-## Where it breaks down
+## Where it falls short
 
 Two places.
 
@@ -55,7 +55,7 @@ Two places.
 
 **Synonyms.** "Docker", "containerization", and "container orchestration" all refer to overlapping concepts. Keyword matching treats them as completely different strings, so a resume with "Docker" won't match a job posting that says "containerization experience required".
 
-## LLM extraction with a surgical prompt
+## How the LLM extraction works
 
 ResumeRadar uses two separate extraction prompts, one for resumes and one for job descriptions.
 
@@ -95,7 +95,7 @@ Return ONLY a JSON array of strings. No markdown, no explanation.
 
 A few decisions worth explaining.
 
-The `skills` vs `inferred_skills` split is intentional. Keeping them separate lets the matching layer weight them differently, since an explicitly listed skill is stronger evidence than an inferred one. It also lets me show the candidate exactly what was inferred vs what they actually wrote, which matters for trust.
+The `skills` vs `inferred_skills` split is intentional. Keeping them separate lets the matching layer weight them differently, since an explicitly listed skill is stronger evidence than an inferred one. It also lets the candidate see exactly what was inferred vs what they actually wrote, which matters for trust.
 
 `temperature=0` throughout. Skill extraction needs to be deterministic. Any randomness in what gets extracted from the same input is just noise.
 
@@ -125,12 +125,10 @@ except Exception as e:
 
 Both paths return a `GapAnalysis` object, so the rest of the pipeline doesn't know which one ran. Keyword matching gives worse results than semantic matching, but it's better than returning an error. For explicit skills, the difference is smaller than you'd expect.
 
-## When to use each
+## When to reach for each
 
-After building this, my rough mental model:
+Keyword matching earns its place when skills are explicit and the vocabulary is controlled. Internal tooling, structured job boards, anything where the input is consistent. Speed, full transparency, zero external dependencies.
 
-**Keyword matching** when you need speed, transparency, or zero external dependencies. Also when skills are explicitly listed and you control the vocabulary: internal tooling, structured job boards, anything where the input is consistent.
+LLMs earn their place when the signal is implicit. When what someone did and what they call it regularly diverge. Resume parsing is a good fit for that reason.
 
-**LLM extraction** when the signal is implicit, the vocabulary is inconsistent, or you need to handle synonyms. Resume parsing is a good fit. So is any domain where "what someone did" and "what they call it" regularly diverge.
-
-The mistake is treating these as competing approaches. They're complementary. Keyword matching as a fallback isn't a compromise, it's just what keeps the system useful when the smarter path isn't available.
+The mistake is treating them as competing approaches. Each does something the other can't.

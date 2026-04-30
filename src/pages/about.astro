@@ -5,8 +5,7 @@ import Footer from '../components/Footer.astro';
 
 const stack = {
   languages: ['Python', 'JavaScript', 'SQL'],
-  infrastructure: ['AWS', 'Azure', 'Docker', 'GitHub Actions'],
-  data: ['PySpark', 'Airflow', 'Pandas'],
+  infrastructure: ['AWS', 'Docker', 'GitHub Actions'],
   backend: ['FastAPI', 'LangChain', 'LangGraph'],
 };
 ---
@@ -26,17 +25,16 @@ const stack = {
           <p class="intro">
             Software Engineer based in São Paulo.
           </p>
-          <p class="intro-sub">
-            I build backend systems and data pipelines that are reliable, observable, and built to last.
+          <p>
+            I build backend systems and the infrastructure around them, with a preference
+            for tools that have a clear purpose and code that goes beyond the happy path.
           </p>
           <p>
-            Data engineering and backend infrastructure done right don't just process data.
-            They make it useful for the people and products that depend on it.
+            Security has become a growing interest. What pulls me in is how much you need
+            to understand a system before you can find where it breaks.
           </p>
           <p>
-            Outside of that, I have an active interest in cybersecurity. I study through
-            labs and CTFs, and I'm building toward security engineering as a natural
-            extension of the systems work I already do.
+            I have a soft spot for open-source.
           </p>
         </div>
 
@@ -89,12 +87,6 @@ const stack = {
     color: var(--text);
     font-size: var(--text-lg);
     font-weight: 300;
-    margin-bottom: var(--space-6);
-  }
-
-  .about-bio p.intro-sub {
-    color: var(--text-muted);
-    font-size: var(--text-base);
     margin-bottom: var(--space-6);
   }
 
