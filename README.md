@@ -7,7 +7,7 @@ Personal site. Built with Astro 6, MDX, and TypeScript.
 - **Framework**: Astro 6
 - **Content**: MDX (blog + writeups)
 - **Styling**: Vanilla CSS with custom design system
-- **Fonts**: DM Serif Display, Inter, JetBrains Mono — self-hosted
+- **Fonts**: DM Serif Display, Inter, JetBrains Mono (self-hosted)
 - **Deploy**: Cloudflare Pages
 
 ## Structure

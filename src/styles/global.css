@@ -1,11 +1,11 @@
 /* ============================================================
-   GLOBAL STYLES — fulvio.sh
+   GLOBAL STYLES - fulvio.sh
    Fonts: DM Serif Display / Inter / JetBrains Mono
    Theme: Monochromatic, light/dark, editorial + technical
    ============================================================ */
 
 /* ------------------------------------------------------------
-   FONT IMPORTS — self-hosted in /public/fonts/
+   FONT IMPORTS - self-hosted in /public/fonts/
    ------------------------------------------------------------ */
 
 /* DM Serif Display */
@@ -68,7 +68,7 @@
 }
 
 /* ------------------------------------------------------------
-   CSS VARIABLES — LIGHT MODE (default)
+   CSS VARIABLES - LIGHT MODE (default)
    ------------------------------------------------------------ */
 
 :root {
@@ -120,7 +120,7 @@
 }
 
 /* ------------------------------------------------------------
-   CSS VARIABLES — DARK MODE
+   CSS VARIABLES - DARK MODE
    ------------------------------------------------------------ */
 
 [data-theme="dark"] {
@@ -197,7 +197,7 @@ p.lead {
   line-height: 1.7;
 }
 
-/* Metadata — dates, tags, categories */
+/* Metadata - dates, tags, categories */
 .meta {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
@@ -222,7 +222,7 @@ a:hover {
   text-decoration-color: var(--text-muted);
 }
 
-/* Nav links — no underline */
+/* Nav links - no underline */
 a.nav-link {
   text-decoration: none;
   font-family: var(--font-mono);
@@ -269,7 +269,7 @@ pre code {
   font-size: inherit;
 }
 
-/* Copy button container — JS will inject button */
+/* Copy button container - JS will inject button */
 .code-block {
   position: relative;
 }
@@ -359,7 +359,7 @@ footer p {
 }
 
 /* ------------------------------------------------------------
-   PROSE — blog posts and writeups
+   PROSE - blog posts and writeups
    ------------------------------------------------------------ */
 
 .prose {
@@ -438,7 +438,7 @@ pre.astro-code {
 }
 
 /* ------------------------------------------------------------
-   CARDS — projects, writing list
+   CARDS - projects, writing list
    ------------------------------------------------------------ */
 
 .card {
@@ -461,7 +461,7 @@ pre.astro-code {
 }
 
 /* ------------------------------------------------------------
-   WRITING LIST — blog + writeups
+   WRITING LIST - blog + writeups
    ------------------------------------------------------------ */
 
 .writing-list {

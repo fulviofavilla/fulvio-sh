@@ -17,11 +17,11 @@ draft: false
 **Difficulty:** Very Easy  
 **Status:** Retired
 
-ReactOOPS presents a polished AI assistant landing page. No login form, no search bar, no file upload. The scenario hints at user input shaping the system in unexpected ways, which is confusing at first since there is no user input anywhere on the page. That turns out to be exactly the point.
+ReactOOPS presents a polished AI assistant landing page. No login form, no search bar, no file upload. The scenario hints at user input shaping the system in unexpected ways, which is confusing at first since there is no user input anywhere on the page.
 
 ## Recon
 
-Opening the source zip provided with the challenge is the natural starting point. The Dockerfile tells a lot right away:
+With no UI to interact with, the source zip is the starting point. The Dockerfile tells a lot right away:
 
 ```dockerfile
 COPY challenge/flag.txt /app/flag.txt
@@ -50,7 +50,7 @@ The project is named `react2shell`. And `next: 16.0.6` is a specific version wor
 
 [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) is an RCE vulnerability in Next.js Server Functions, originally discovered by [Lachlan Davidson](https://github.com/lachlan2k/React2Shell-CVE-2025-55182-original-poc). The root cause is prototype pollution in the React Flight Protocol during deserialization of Server Action requests. Setting the header `Next-Action: foo` is enough to trigger it, no valid Server Action needed, and it fires before any validation runs.
 
-In OWASP terms this is A06:2021 - Vulnerable and Outdated Components. No inputs to sanitize, no logic to bypass. The vulnerability lives entirely in the framework version.
+In OWASP terms this is A06:2021 - Vulnerable and Outdated Components. Hard to spot manually, trivial to catch with proper recon.
 
 ## Exploitation
 
@@ -108,6 +108,6 @@ $ python3 exploit.py
 
 ## Takeaway
 
-A web application with no user-facing inputs is not necessarily safe. There was nothing to sanitize in this UI, no forms, no search, no file uploads. The attack surface was the Next.js version pinned in `package.json`.
+A web application with no user-facing inputs is not necessarily safe. There was nothing to exploit in this UI, no forms, no search, no file uploads. The attack surface was the Next.js version pinned in `package.json`.
 
 This is what OWASP A06 looks like in practice. CVE-2025-55182 carries a CVSS v3 score of 10.0, the maximum. The window of exposure depends entirely on how quickly the framework gets updated. `npm audit` and dependency alerts are not noise. They are the attack surface.

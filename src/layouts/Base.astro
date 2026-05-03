@@ -9,14 +9,14 @@ interface Props {
 
 const {
   title,
-  description = "Software Engineer based in São Paulo. Backend systems, infrastructure, and security.",
+  description = "Software Engineer. Backend systems, infrastructure, and security.",
   ogImage = "/og-default.svg",
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
 const fullTitle =
-  title === "Fulvio Favilla" ? title : `${title} — Fulvio Favilla`;
+  title === "Fulvio Favilla" ? title : `${title} | Fulvio Favilla`;
 ---
 
 <!doctype html>
