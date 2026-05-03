@@ -2,15 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-
-const stack = {
-  languages: ['Python', 'JavaScript', 'SQL'],
-  infrastructure: ['AWS', 'Docker', 'GitHub Actions'],
-  backend: ['FastAPI', 'LangChain', 'LangGraph'],
-};
 ---
 
-<Base title="About — Fulvio Favilla" description="Software Engineer based in São Paulo.">
+<Base title="About" description="Software Engineer. Backend systems, infrastructure, and security.">
   <Header />
 
   <main>
@@ -20,34 +14,18 @@ const stack = {
         <h1>Fulvio Favilla</h1>
       </div>
 
-      <div class="about-grid">
-        <div class="about-bio">
-          <p class="intro">
-            Software Engineer
-          </p>
-          <p>
-            I build backend systems and the infrastructure around them, with a preference
-            for tools that have a clear purpose and code that goes beyond the happy path.
-          </p>
-          <p>
-            Security has become a growing interest. What pulls me in is how much you need
-            to understand a system before you can find where it breaks.
-          </p>
-          <p>
-            I have a soft spot for open-source. Code that anyone can read, question, and improve.
-          </p>
-        </div>
-
-        <div class="about-stack">
-          {Object.entries(stack).map(([category, items]) => (
-            <div class="stack-group">
-              <div class="stack-label meta">{category}</div>
-              <div class="tags">
-                {items.map((item) => <span class="tag">{item}</span>)}
-              </div>
-            </div>
-          ))}
-        </div>
+      <div class="about-bio">
+        <p>
+          I build backend systems and the infrastructure around them, with a preference
+          for tools that have a clear purpose and code that goes beyond the happy path.
+        </p>
+        <p>
+          Security has become a growing interest. What pulls me in is how much you need
+          to understand a system before you can find where it breaks.
+        </p>
+        <p>
+          I have a soft spot for open-source. Code that anyone can read, question, and improve.
+        </p>
       </div>
     </section>
   </main>
@@ -69,44 +47,14 @@ const stack = {
     margin: 0;
   }
 
-  .about-grid {
-    display: grid;
-    grid-template-columns: 5fr 4fr;
-    gap: var(--space-16);
+  .about-bio {
+    max-width: 600px;
     padding-bottom: var(--space-16);
-    align-items: start;
   }
 
   .about-bio p {
     color: var(--text-muted);
     line-height: 1.7;
     margin-bottom: var(--space-6);
-  }
-
-  .about-bio p.intro {
-    color: var(--text);
-    font-size: var(--text-lg);
-    font-weight: 300;
-    margin-bottom: var(--space-6);
-  }
-
-  .stack-group {
-    margin-bottom: var(--space-8);
-  }
-
-  .stack-group:last-child {
-    margin-bottom: 0;
-  }
-
-  .stack-label {
-    margin-bottom: var(--space-3);
-    color: var(--text-faint);
-  }
-
-  @media (max-width: 680px) {
-    .about-grid {
-      grid-template-columns: 1fr;
-      gap: var(--space-10);
-    }
   }
 </style>
