@@ -1,0 +1,100 @@
+---
+interface Entry {
+  href: string;
+  type: 'blog' | 'writeup';
+  data: {
+    title: string;
+    date: Date;
+  };
+}
+
+interface Props {
+  entries: Entry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{entries.length === 0 ? (
+  <p class="meta empty">Nothing published yet.</p>
+) : (
+  <ul class="post-list">
+    {entries.map((entry) => {
+      const isoDate = entry.data.date.toISOString().split('T')[0];
+      return (
+        <li class="post-item">
+          <a href={entry.href} class="post-link">
+            <time datetime={isoDate} class="post-date meta">{isoDate}</time>
+            <span class="post-title">{entry.data.title}</span>
+            <span class={`post-type meta type--${entry.type}`}>{entry.type === 'writeup' ? 'writeup' : 'blog'}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+)}
+
+<style>
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-item {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .post-item:last-child {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .post-link {
+    display: grid;
+    grid-template-columns: 7rem 1fr auto;
+    align-items: baseline;
+    gap: var(--space-6);
+    padding: var(--space-4) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.15s ease;
+  }
+
+  .post-link:hover {
+    opacity: 0.6;
+  }
+
+  .post-date {
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+
+  .post-title {
+    font-size: var(--text-base);
+    color: var(--text);
+  }
+
+  .post-type {
+    color: var(--text-faint);
+  }
+
+  .type--writeup {
+    color: var(--text-faint);
+  }
+
+  .empty {
+    color: var(--text-faint);
+    padding-bottom: var(--space-16);
+  }
+
+  @media (max-width: 600px) {
+    .post-link {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .post-type {
+      display: none;
+    }
+  }
+</style>

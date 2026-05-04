@@ -1,12 +1,19 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import WritingList from '../components/WritingList.astro';
 
-const stack = [
-  'Python', 'JavaScript', 'SQL', 'AWS', 'Docker',
-  'FastAPI', 'LangChain', 'LangGraph', 'GitHub Actions',
-];
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const writeups = await getCollection('writeups', ({ data }) => !data.draft);
+
+const recentWriting = [
+  ...posts.map((p) => ({ ...p, type: 'blog' as const, href: `/blog/${p.id}` })),
+  ...writeups.map((w) => ({ ...w, type: 'writeup' as const, href: `/writeups/${w.id}` })),
+]
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
 
 const featured = [
   {
@@ -53,6 +60,17 @@ const featured = [
         <a href="/projects" class="nav-link">all projects →</a>
       </div>
     </section>
+
+    <!-- Recent writing -->
+    {recentWriting.length > 0 && (
+      <section class="section container">
+        <h2 class="section-label meta">recent writing</h2>
+        <WritingList entries={recentWriting} />
+        <div style="margin-top: var(--space-6);">
+          <a href="/writing" class="nav-link">all writing →</a>
+        </div>
+      </section>
+    )}
   </main>
 
   <Footer />
