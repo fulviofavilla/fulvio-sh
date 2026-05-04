@@ -274,17 +274,31 @@ pre code {
   position: relative;
 }
 
+/* When pre is wrapped in .code-block, prose margins move to the wrapper */
+.prose .code-block {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.prose .code-block pre {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .code-block .copy-btn {
   position: absolute;
   top: var(--space-3);
   right: var(--space-3);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   color: var(--text-faint);
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: 3px;
-  padding: var(--space-1) var(--space-2);
+  padding: 0;
   cursor: pointer;
   transition: color var(--transition);
 }
@@ -323,6 +337,7 @@ header nav {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-8);
+  min-width: 0;
 }
 
 .nav-brand {
@@ -332,6 +347,7 @@ header nav {
   color: var(--text);
   text-decoration: none;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .nav-links {
@@ -339,6 +355,7 @@ header nav {
   align-items: center;
   gap: var(--space-6);
   list-style: none;
+  flex-shrink: 0;
 }
 
 /* ------------------------------------------------------------
@@ -534,13 +551,16 @@ pre.astro-code {
    ------------------------------------------------------------ */
 
 .theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   background: none;
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
-  padding: var(--space-1) var(--space-2);
+  padding: 0;
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
   color: var(--text-faint);
   transition: color var(--transition), border-color var(--transition);
 }
@@ -582,6 +602,14 @@ pre.astro-code {
   .container,
   .container--wide {
     padding: 0 var(--space-4);
+  }
+
+  header nav {
+    gap: var(--space-3);
+  }
+
+  .nav-links {
+    gap: var(--space-3);
   }
 
   .writing-item {

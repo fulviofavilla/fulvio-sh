@@ -8,8 +8,8 @@ export default defineConfig({
   markdown: {
     shikiConfig: {
       themes: {
-        light: 'vitesse-light',
-        dark: 'vitesse-dark',
+        light: 'gruvbox-light-hard',
+        dark: 'gruvbox-dark-hard',
       },
       defaultColor: false,
     },
