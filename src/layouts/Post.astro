@@ -43,7 +43,7 @@ const isoDate = date.toISOString().split('T')[0];
 
           {difficulty && (
             <span class="meta" style="color: var(--text-faint);">·</span>
-            <span class={`meta difficulty--${difficulty}`}>{difficulty}</span>
+            <span class="meta">{difficulty}</span>
           )}
 
           {readingTime && (
@@ -99,11 +99,6 @@ const isoDate = date.toISOString().split('T')[0];
     border-top: 1px solid var(--border-subtle);
     margin: 0 0 var(--space-12);
   }
-
-  /* Difficulty colors - subtle, no accent */
-  .difficulty--easy   { color: var(--text-muted); }
-  .difficulty--medium { color: var(--text-muted); }
-  .difficulty--hard   { color: var(--text-muted); }
 
   /* Prose spacing within article */
   .prose {
