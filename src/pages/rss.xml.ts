@@ -21,7 +21,7 @@ export async function GET(context: APIContext) {
   return rss({
     title: 'Fulvio Favilla',
     description: 'Blog posts and security writeups.',
-    site: context.site,
+    site: context.site!,
     items,
   });
 }
