@@ -230,7 +230,7 @@ a.nav-link {
   text-decoration: none;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  color: var(--text-muted);
+  color: var(--text-faint);
   letter-spacing: 0.03em;
   transition: color var(--transition);
 }
@@ -580,6 +580,16 @@ pre.astro-code {
   color: var(--text-muted);
   border-color: var(--border);
 }
+
+.icon-sun,
+.icon-moon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"]  .icon-moon { display: none; }
+[data-theme="light"] .icon-sun  { display: none; }
 
 /* ------------------------------------------------------------
    UTILITIES
