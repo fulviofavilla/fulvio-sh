@@ -21,7 +21,7 @@ jobs:
         run: npm ci
 
       - name: dependency audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
 
       - name: type check
         run: npx astro check
