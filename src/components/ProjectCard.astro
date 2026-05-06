@@ -1,0 +1,52 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  tags: string[];
+  href: string;
+  status: string;
+}
+
+const { name, description, tags, href, status } = Astro.props;
+---
+
+<a href={href} class="card card-link" target="_blank" rel="noopener noreferrer">
+  <div class="card-header">
+    <span class="card-name">{name}</span>
+    <span class="tag">{status}</span>
+  </div>
+  <p class="card-description">{description}</p>
+  <div class="tags" style="margin-top: var(--space-4);">
+    {tags.map((t: string) => <span class="tag">{t}</span>)}
+  </div>
+</a>
+
+<style>
+  .card-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .card-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .card-description {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+</style>
