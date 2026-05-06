@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WritingList from '../components/WritingList.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const writeups = await getCollection('writeups', ({ data }) => !data.draft);
@@ -43,18 +44,7 @@ const featured = [
     <section class="section container">
       <h2 class="section-label meta">featured projects</h2>
       <div class="card-grid">
-        {featured.map(({ name, description, tags, href, status }) => (
-          <a href={href} class="card card-link" target="_blank" rel="noopener noreferrer">
-            <div class="card-header">
-              <span class="card-name">{name}</span>
-              <span class="tag">{status}</span>
-            </div>
-            <p class="card-description">{description}</p>
-            <div class="tags" style="margin-top: var(--space-4);">
-              {tags.map((t) => <span class="tag">{t}</span>)}
-            </div>
-          </a>
-        ))}
+        {featured.map((project) => <ProjectCard {...project} />)}
       </div>
       <div style="margin-top: var(--space-6);">
         <a href="/projects" class="nav-link">all projects →</a>
@@ -106,34 +96,5 @@ const featured = [
 
   .section-label {
     margin-bottom: var(--space-6);
-  }
-
-  /* Card link override */
-  .card-link {
-    display: block;
-    text-decoration: none;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-
-  .card-name {
-    font-family: var(--font-mono);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: 0.02em;
-  }
-
-  .card-description {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 0;
   }
 </style>
