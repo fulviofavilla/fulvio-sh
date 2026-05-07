@@ -44,6 +44,7 @@ const fullTitle =
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Primary meta -->
     <title>{fullTitle}</title>
@@ -68,19 +69,7 @@ const fullTitle =
     <meta name="twitter:image" content={ogImageURL} />
 
     <!-- Theme: set before paint to avoid flash -->
-    <script is:inline>
-      (function () {
-        const stored = localStorage.getItem("theme");
-        const preferred = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        document.documentElement.setAttribute(
-          "data-theme",
-          stored ?? preferred,
-        );
-      })();
-    </script>
+    <script src="/theme.js"></script>
   </head>
   <body>
     <slot />
