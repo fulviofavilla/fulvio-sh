@@ -21,7 +21,6 @@ const writeups = defineCollection({
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     platform: z.string().optional(),
-    difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
     draft: z.boolean().default(false),
   }),
 });
