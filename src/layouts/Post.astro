@@ -9,12 +9,12 @@ interface Props {
   date: Date;
   tags?: string[];
   platform?: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
+
   readingTime?: number;
   slug: string;
 }
 
-const { title, description, date, tags = [], platform, difficulty, readingTime, slug } = Astro.props;
+const { title, description, date, tags = [], platform, readingTime, slug } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -39,11 +39,6 @@ const isoDate = date.toISOString().split('T')[0];
           {platform && (
             <span class="meta" style="color: var(--text-faint);">·</span>
             <span class="meta">{platform}</span>
-          )}
-
-          {difficulty && (
-            <span class="meta" style="color: var(--text-faint);">·</span>
-            <span class="meta">{difficulty}</span>
           )}
 
           {readingTime && (
