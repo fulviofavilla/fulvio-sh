@@ -109,4 +109,4 @@ $ python3 exploit.py
 
 A web application with no user-facing inputs is not necessarily safe. There was nothing to exploit in this UI, no forms, no search, no file uploads. The attack surface was the Next.js version pinned in `package.json`.
 
-This is what OWASP A06 looks like in practice. CVE-2025-55182 carries a CVSS v3 score of 10.0, the maximum. The window of exposure depends entirely on how quickly the framework gets updated. `npm audit` and dependency alerts are not noise. They are the attack surface.
+The window of exposure depends entirely on how quickly the framework gets updated. `npm audit` and dependency alerts are not noise. They are the attack surface.

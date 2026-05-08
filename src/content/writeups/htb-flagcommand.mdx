@@ -1,0 +1,81 @@
+---
+title: "HTB Web | Flag Command: apparently a non-winnable game"
+description: "A horror D&D text adventure where every path leads to death. The way out was never inside the game."
+date: 2026-05-07
+tags: [ctf, web, javascript, client-side, devtools]
+platform: HackTheBox
+category: Web
+retired: true
+draft: false
+---
+
+## Overview
+
+**Platform:** HackTheBox  
+**Category:** Web  
+**Difficulty:** Very Easy  
+**Status:** Retired
+
+Flag Command is a browser-based text adventure set in a horror D&D scenario: an alien forest, a grinning figure muttering in the shadows, friends lost in an abyss of darkness. There is a real game to play across four steps, and wrong choices get you killed. The actual vulnerability has nothing to do with the game itself.
+
+## Recon
+
+Playing the game a few times makes one thing clear: every path ends in death. Different choices, same result. The game feels unwinnable by design, which shifts attention away from the terminal and toward the Network tab in DevTools.
+
+A GET to `/api/options` fires on page load, before any interaction. The response is the full command structure for every step:
+
+```json
+{
+  "allPossibleCommands": {
+    "1": ["HEAD NORTH", "HEAD WEST", "HEAD EAST", "HEAD SOUTH"],
+    "2": ["GO DEEPER INTO THE FOREST", "FOLLOW A MYSTERIOUS PATH", "CLIMB A TREE", "TURN BACK"],
+    "3": ["EXPLORE A CAVE", "CROSS A RICKETY BRIDGE", "FOLLOW A GLOWING BUTTERFLY", "SET UP CAMP"],
+    "4": ["ENTER A MAGICAL PORTAL", "SWIM ACROSS A MYSTERIOUS LAKE", "FOLLOW A SINGING SQUIRREL", "BUILD A RAFT AND SAIL DOWNSTREAM"],
+    "secret": ["Blip-blop, in a pickle with a hiccup! Shmiggity-shmack"]
+  }
+}
+```
+
+Steps 1 through 4 match what the UI renders, including the valid choices that do not get you killed. The `secret` key does not appear anywhere in the game. That is enough to get the flag, but before going there it is worth understanding how the system actually works.
+
+## How the game works
+
+Under the Debugger tab in DevTools, the JS source is available unobfuscated under `static/terminal/js`. The relevant logic lives in `main.js`.
+
+On page load, `fetchOptions()` calls `/api/options` and stores the full response in `availableOptions`. When a command is submitted, `CheckMessage()` validates it client-side first:
+
+```javascript
+if (availableOptions[currentStep].includes(currentCommand) || availableOptions['secret'].includes(currentCommand)) {
+    await fetch('/api/monitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 'command': currentCommand })
+    })
+    .then((res) => res.json())
+    .then(async (data) => {
+        if (data.message.includes('HTB{')) {
+            playerWon();
+        }
+    });
+}
+```
+
+Commands that pass are forwarded to `/api/monitor`, which runs its own validation server-side. The `secret` entry sits in the same `availableOptions` object, passes the client-side check, and the backend accepts it regardless of which step the game is on.
+
+## Exploitation
+
+The secret is case-sensitive. Type it exactly as it appears in the `/api/options` response, with the game already started.
+
+With the game started, type the secret from `/api/options` directly into the terminal:
+
+```
+>> Blip-blop, in a pickle with a hiccup! Shmiggity-shmack
+```
+
+The flag comes back in the terminal response. It references developer tools by name, a nod to exactly how this was meant to be solved.
+
+## Takeaway
+
+The `secret` command was never rendered in the UI, but it arrived in the browser on the very first page load, inside the GET response from `/api/options`. The UI filtered what it showed. The API returned everything.
+
+Secrets should live in environment variables on the server and never travel to the client. Beyond that, `/api/options` should not have a `secret` key at all. What the API returns is what the browser receives, regardless of what the interface chooses to display.
