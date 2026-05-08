@@ -62,23 +62,9 @@ if (availableOptions[currentStep].includes(currentCommand) || availableOptions['
 
 Commands that pass are forwarded to `/api/monitor`, which runs its own validation server-side. The `secret` entry sits in the same `availableOptions` object, passes the client-side check, and the backend accepts it regardless of which step the game is on.
 
-There is one catch around capitalisation. All input goes through `commander()` before anything else:
-
-```javascript
-const commander = (commandText) => {
-    const cleanCommand = commandText.toLowerCase().trim();
-    ...
-}
-```
-
-The secret has specific capitalisation. Before the game starts, `commander()` handles all input and lowercases it, so the secret never matches. Once `start` is typed and the game is running, game commands bypass `commander()` and go through `CheckMessage()` directly, where the original casing from `commandHistory` is preserved:
-
-```javascript
-commandHistory.push(commandText.innerHTML);
-currentCommand = commandHistory.length;
-```
-
 ## Exploitation
+
+The secret is case-sensitive. Type it exactly as it appears in the `/api/options` response, with the game already started.
 
 With the game started, type the secret from `/api/options` directly into the terminal:
 
