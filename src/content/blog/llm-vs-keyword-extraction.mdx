@@ -43,23 +43,13 @@ def _keyword_gap_analysis(
     ...
 ```
 
-`SKILL_NOISE` is a manually curated blocklist: "engineer", "senior", "team", "experience", "building". Without it, the results fill up with words that look like skills but carry no signal. You need to maintain this list by hand, which is annoying but unavoidable.
+`SKILL_NOISE` is a manually curated blocklist: "engineer", "senior", "team", "experience", "building". Without it, the results fill up with words that look like skills but carry no signal.
 
 The upside: you can inspect every match, trace every decision, and the output is consistent across runs. The downside: it only finds what it's explicitly looking for.
 
-## Where it falls short
-
-Two places.
-
-**Implicit skills.** A candidate who "reduced deployment time from 45 to 8 minutes" has clearly worked with CI/CD pipelines. But unless they wrote "CI/CD" somewhere, keyword matching won't find it. Most candidates don't narrate their skills. They describe what they did, and leave the label implicit.
-
-**Synonyms.** "Docker", "containerization", and "container orchestration" all refer to overlapping concepts. Keyword matching treats them as completely different strings, so a resume with "Docker" won't match a job posting that says "containerization experience required".
-
 ## How the LLM extraction works
 
-ResumeRadar uses two separate extraction prompts, one for resumes and one for job descriptions.
-
-The resume prompt:
+The LLM handles what keyword matching can't: skills that are demonstrated but never written down. The resume prompt instructs the model to infer them directly:
 
 ```python
 EXTRACTION_PROMPT = """
@@ -81,7 +71,7 @@ Rules:
 """
 ```
 
-The job description prompt:
+The job description prompt does the opposite: extracts only what the role explicitly requires.
 
 ```python
 JOB_SKILL_PROMPT = """
@@ -93,42 +83,14 @@ Return ONLY a JSON array of strings. No markdown, no explanation.
 """
 ```
 
-A few decisions worth explaining.
+**The `skills` vs `inferred_skills` split is intentional.**
 
-The `skills` vs `inferred_skills` split is intentional. Keeping them separate lets the matching layer weight them differently, since an explicitly listed skill is stronger evidence than an inferred one. It also lets the candidate see exactly what was inferred vs what they actually wrote, which matters for trust.
-
-`temperature=0` throughout. Skill extraction needs to be deterministic. Any randomness in what gets extracted from the same input is just noise.
-
-Job descriptions get truncated to 3,000 characters, resumes to 8,000. The main reason isn't token cost. Longer inputs tend to get diluted by boilerplate, and the most relevant content is almost always near the top.
-
-## The fallback
-
-ResumeRadar uses ChromaDB as a vector database for semantic matching. A vector database stores data as numeric representations of meaning, which allows comparing resumes and job postings by concept rather than exact words. When ChromaDB is unavailable, the whole semantic path goes down with it.
-
-So keyword matching isn't just legacy code. It's an explicit fallback:
-
-```python
-try:
-    state.gap_analysis = await _semantic_gap_analysis(
-        job_id=state.job_id,
-        resume_skills=all_resume_skills,
-        job_postings_skills=job_skills_lists,
-    )
-except Exception as e:
-    logger.warning(f"ChromaDB unavailable ({e}), falling back to keyword matching")
-    state.gap_analysis = _keyword_gap_analysis(
-        resume_skills=all_resume_skills,
-        job_postings_skills=job_skills_lists,
-        job_descriptions=job_descriptions,
-    )
-```
-
-Both paths return a `GapAnalysis` object, so the rest of the pipeline doesn't know which one ran. Keyword matching gives worse results than semantic matching, but it's better than returning an error. For explicit skills, the difference is smaller than you'd expect.
+Keeping them separate lets the matching layer weight them differently, since an explicitly listed skill is stronger evidence than an inferred one. It also keeps both available separately downstream, so any step that needs to treat them differently can.
 
 ## When to reach for each
 
 Keyword matching earns its place when skills are explicit and the vocabulary is controlled. Internal tooling, structured job boards, anything where the input is consistent. Speed, full transparency, zero external dependencies.
 
-LLMs earn their place when the signal is implicit. When what someone did and what they call it regularly diverge. Resume parsing is a good fit for that reason.
+LLMs earn their place when the signal is implicit. When what someone did and what they wrote down don't always match. Resume parsing is a good fit for that reason.
 
 The mistake is treating them as competing approaches. Each does something the other can't.
