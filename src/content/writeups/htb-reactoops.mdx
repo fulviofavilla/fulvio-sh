@@ -43,11 +43,15 @@ Looking at `package.json` reveals a more interesting lead:
 }
 ```
 
-The project is named `react2shell`. And `next: 16.0.6` is a specific version worth searching for. A quick search for `Next.js 16.0.6 CVE` turns up [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182): an RCE vulnerability in Next.js Server Functions via prototype pollution in the React Flight Protocol.
+The project is named `react2shell`. And `next: 16.0.6` is a specific version worth searching for.
+
+A quick search for `Next.js 16.0.6 CVE` turns up [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182): an RCE vulnerability in Next.js Server Functions via prototype pollution in the React Flight Protocol.
 
 ## The vulnerability: CVE-2025-55182
 
-[CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) is an RCE vulnerability in Next.js Server Functions, originally discovered by [Lachlan Davidson](https://github.com/lachlan2k/React2Shell-CVE-2025-55182-original-poc). The root cause is prototype pollution in the React Flight Protocol during deserialization of Server Action requests. Setting the header `Next-Action: foo` is enough to trigger it, no valid Server Action needed, and it fires before any validation runs.
+[CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) is an RCE vulnerability in Next.js Server Functions, originally discovered by [Lachlan Davidson](https://github.com/lachlan2k/React2Shell-CVE-2025-55182-original-poc). The root cause is prototype pollution in the React Flight Protocol during deserialization of Server Action requests.
+
+Setting the header `Next-Action: foo` is enough to trigger it, no valid Server Action needed, and it fires before any validation runs.
 
 In OWASP terms this is A06:2021 - Vulnerable and Outdated Components. Hard to spot manually, trivial to catch with proper recon.
 
@@ -61,7 +65,7 @@ Based on the [PoC by msanft](https://github.com/msanft/CVE-2025-55182/tree/main)
 import requests
 import json
 
-url = "http://154.57.X.X:PORT/"
+url = "http://IP:PORT/"
 
 cmd = "cat /app/flag.txt"
 prefix = (

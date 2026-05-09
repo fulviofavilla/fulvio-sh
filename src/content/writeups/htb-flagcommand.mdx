@@ -16,7 +16,9 @@ draft: false
 **Difficulty:** Very Easy  
 **Status:** Retired
 
-Flag Command is a browser-based text adventure set in a horror D&D scenario: an alien forest, a grinning figure muttering in the shadows, friends lost in an abyss of darkness. There is a real game to play across four steps, and wrong choices get you killed. The actual vulnerability has nothing to do with the game itself.
+Flag Command is a browser-based text adventure set in a horror D&D scenario: an alien forest, a grinning figure muttering in the shadows, friends lost in an abyss of darkness.
+
+There is a real game to play across four steps, and wrong choices get you killed. The actual vulnerability has nothing to do with the game itself.
 
 ## Recon
 
@@ -36,7 +38,9 @@ A GET to `/api/options` fires on page load, before any interaction. The response
 }
 ```
 
-Steps 1 through 4 match what the UI renders, including the valid choices that do not get you killed. The `secret` key does not appear anywhere in the game. That is enough to get the flag, but before going there it is worth understanding how the system actually works.
+Steps 1 through 4 match what the UI renders, including the valid choices that do not get you killed. The `secret` key does not appear anywhere in the game.
+
+That is enough to get the flag, but before going there it is worth understanding how the system actually works.
 
 ## How the game works
 
