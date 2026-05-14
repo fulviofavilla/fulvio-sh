@@ -26,13 +26,6 @@ const fullTitle =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Analytics -->
-    <script
-      is:inline
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="5457021c-d117-49e3-acb9-8781902f7bb8"></script>
-
     <!-- RSS Feed -->
     <link
       rel="alternate"
@@ -158,5 +151,11 @@ const fullTitle =
       initCopyButtons();
       document.addEventListener("astro:after-swap", initCopyButtons);
     </script>
+
+    <!-- Analytics -->
+    <script
+      is:inline
+      src="https://cloud.umami.is/script.js"
+      data-website-id="5457021c-d117-49e3-acb9-8781902f7bb8"></script>
   </body>
 </html>
