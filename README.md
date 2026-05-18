@@ -1,26 +1,24 @@
 # fulvio.sh
 
-Personal site. Built with Astro 6, MDX, and TypeScript.
+Personal site built with Astro 6, MDX, and TypeScript. Deployed on Cloudflare Pages.
 
 ## Stack
 
-- **Framework**: Astro 6
-- **Content**: MDX (blog + writeups)
-- **Styling**: Vanilla CSS with custom design system
+- **Framework**: Astro 6 + MDX
 - **Fonts**: DM Serif Display, Inter, JetBrains Mono (self-hosted)
-- **Deploy**: Cloudflare Pages
+- **Deploy**: Cloudflare Pages (static)
+- **Analytics**: Umami
 
 ## Structure
 
 ```
 src/
-├── components/       # Header, Footer
+├── components/       # Header, Footer, ProjectCard, WritingList
 ├── content/
 │   ├── blog/         # Blog posts (.mdx)
 │   └── writeups/     # CTF & security writeups (.mdx)
 ├── layouts/          # Base, Post
-├── pages/            # index, about, projects, writing, blog/[slug], writeups/[slug]
-└── styles/           # global.css
+└── pages/            # index, projects, writing, blog/[slug], writeups/[slug]
 ```
 
 ## Development
@@ -32,7 +30,7 @@ npm run dev
 
 ## Content
 
-Blog posts and writeups live in `src/content/`. Both use MDX with frontmatter:
+Posts and writeups live in `src/content/`. Both use MDX with frontmatter:
 
 ```yaml
 # blog
@@ -48,12 +46,11 @@ description: ""
 date: YYYY-MM-DD
 tags: []
 platform: ""
-difficulty: ""
 draft: true
 ```
 
 Set `draft: false` to publish.
 
-## Deploy
+## CI
 
-Connected to Cloudflare Pages. Pushes to `main` deploy automatically.
+GitHub Actions runs `npm audit --audit-level=high` and `astro check` on every push and PR to `main`.
