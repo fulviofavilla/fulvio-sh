@@ -1,0 +1,73 @@
+---
+title: "HTB Web | Spookifier: not all fonts are equal"
+description: "A Halloween name generator with four spooky fonts. The scariest thing about it was the sanitization."
+date: 2026-05-23
+tags: [ctf, web, python, flask, mako, ssti]
+platform: HackTheBox
+category: Web
+retired: true
+draft: false
+---
+
+## Overview
+
+**Platform:** HackTheBox  
+**Category:** Web  
+**Difficulty:** Very Easy  
+**Status:** Retired
+
+Spookifier is a Flask app with a single purpose: take a name, run it through four custom fonts, and display the spooky result. No login, no file upload, no obvious attack surface beyond the text input.
+
+## Recon
+
+The source zip reveals a Flask app with one route and one interesting file: `util.py`. The application takes user input, transforms it through four font hashmaps, and renders the result.
+
+The Dockerfile confirms the flag location:
+
+```dockerfile
+COPY flag.txt /flag.txt
+```
+
+The fonts themselves are Python dictionaries mapping ASCII characters to stylized Unicode equivalents. Font 1 uses Gothic script, font 2 uses Canadian Syllabics, font 3 uses currency symbols. Font 4 is different: it maps every character to itself, including digits, punctuation, and special characters like `$`, `{`, `}`, and `/`.
+
+## The vulnerability
+
+The rendering logic in `util.py` is where the flaw lives:
+
+```python
+def generate_render(converted_fonts):
+    result = '''
+        <tr><td>{0}</td></tr>
+        <tr><td>{1}</td></tr>
+        <tr><td>{2}</td></tr>
+        <tr><td>{3}</td></tr>
+    '''.format(*converted_fonts)
+
+    return Template(result).render()
+```
+
+The converted font strings are interpolated directly into an HTML template using `.format()`, and that string is then passed to Mako's `Template().render()`. The user input becomes part of the template source before the engine ever compiles it.
+
+That is textbook Server-Side Template Injection.
+
+## Exploitation
+
+Mako uses `${}` for expression evaluation and executes Python directly. Submitting `${7*7}` through the input form confirms the injection: the fourth row renders `49` instead of the literal string, while the other three garble or drop the characters.
+
+From there, reading the flag is a single expression since `open` is a Python builtin and Mako runs without a sandbox:
+
+```
+${open('/flag.txt').read()}
+```
+
+The challenge scenario hints at RCE via `os` through Mako's `TemplateNamespace`, though not needed here. If it were needed, it could be done like this:
+
+```
+${self.module.cache.util.os.popen('whoami').read()}
+```
+
+
+
+## Takeaway
+
+The font hashmaps give the appearance of sanitization but never touch the template engine. The fix is passing the converted strings as variables to the template instead of formatting them into the source. The input is data, not source.
