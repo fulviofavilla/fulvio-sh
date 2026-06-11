@@ -7,10 +7,24 @@ import ProjectCard from '../components/ProjectCard.astro';
 const projects = [
   {
     name: 'ResumeRadar',
-    description: 'AI agent that analyzes your resume against real tech job postings, surfaces skill gaps, and rewrites weak bullets.',
-    tags: ['python', 'langgraph', 'fastapi', 'chromadb', 'docker'],
+    description: 'LLM pipeline (LangGraph) that matches resumes against live job-market data, with semantic gap analysis using embeddings and ChromaDB.',
+    tags: ['fastapi', 'langgraph', 'chromadb', 'redis', 'docker'],
     href: 'https://github.com/fulviofavilla/resume-radar',
-    status: 'in progress',
+    status: 'v1',
+  },
+  {
+    name: 'CVD Prediction',
+    description: 'ML pipeline comparing five classifiers for cardiovascular disease prediction, with a distributed ECL/HPCC implementation. Winner of the 2023 HPCC Systems Poster Contest.',
+    tags: ['python', 'scikit-learn', 'ecl', 'hpcc'],
+    href: 'https://github.com/fulviofavilla/cvd-prediction-ml',
+    status: '2023',
+  },
+  {
+    name: 'servepass',
+    description: 'Zero-dependency LAN file server with token auth. Like python -m http.server, but not open to the whole network. Published on PyPI.',
+    tags: ['python', 'stdlib', 'http', 'pypi'],
+    href: 'https://github.com/fulviofavilla/servepass',
+    status: 'v0.2.0',
   },
 ];
 ---
