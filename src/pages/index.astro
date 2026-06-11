@@ -19,24 +19,33 @@ const recentWriting = [
 const featured = [
   {
     name: 'ResumeRadar',
-    description: 'AI agent that analyzes your resume against real tech job postings, surfaces skill gaps, and rewrites weak bullets.',
-    tags: ['python', 'langgraph', 'fastapi', 'chromadb', 'docker'],
+    description: 'LLM pipeline (LangGraph) that matches resumes against live job-market data, with semantic gap analysis using embeddings and ChromaDB.',
+    tags: ['fastapi', 'langgraph', 'chromadb', 'redis', 'docker'],
     href: 'https://github.com/fulviofavilla/resume-radar',
-    status: 'in progress',
+    status: 'v1',
+  },
+  {
+    name: 'CVD Prediction',
+    description: 'ML pipeline comparing five classifiers for cardiovascular disease prediction, with a distributed ECL/HPCC implementation. Winner of the 2023 HPCC Systems Poster Contest.',
+    tags: ['python', 'scikit-learn', 'ecl', 'hpcc'],
+    href: 'https://github.com/fulviofavilla/cvd-prediction-ml',
+    status: '2023',
   },
 ];
 ---
 
-<Base title="Fulvio Favilla" description="Software Engineer. Backend systems, infrastructure, and security.">
+<Base title="Fulvio Favilla" description="Software and electrical engineering: backend systems, energy data, and critical infrastructure.">
   <Header />
 
   <main>
     <!-- Hero -->
     <section class="hero container">
-      <div class="hero-label meta">software engineer</div>
+      <div class="hero-label meta">software × electrical engineering</div>
       <h1>Fulvio Favilla</h1>
       <p class="lead">
-        Writing about what I find along the way.
+        Backend and data engineer with an electrical engineering degree.
+        Building software for the physical world: power systems, energy
+        data, and the infrastructure behind it.
       </p>
     </section>
 
