@@ -20,5 +20,8 @@
     "astro": "^6.4.4",
     "satori": "^0.26.0",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "esbuild": ">=0.28.1"
   }
 }
