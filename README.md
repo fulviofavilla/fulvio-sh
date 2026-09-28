@@ -1,10 +1,10 @@
 # fulvio.sh
 
-Personal site built with Astro 6, MDX, and TypeScript. Deployed on Cloudflare Pages.
+Personal site built with Astro 7, MDX, and TypeScript. Deployed on Cloudflare Pages.
 
 ## Stack
 
-- **Framework**: Astro 6 + MDX
+- **Framework**: Astro 7 + MDX
 - **Fonts**: DM Serif Display, Inter, JetBrains Mono (self-hosted)
 - **Deploy**: Cloudflare Pages (static)
 - **Analytics**: Umami
